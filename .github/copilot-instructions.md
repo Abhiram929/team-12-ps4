@@ -1,0 +1,7 @@
+- Stack: Next.js App Router, TypeScript, Tailwind, Supabase (server-only, secret key), Gemini function calling, Zod.
+- Tables: support_teams(id, name, handles); employees(id, name, email, department, location, laptop_model); sla_rules(priority, meaning, response_hours, resolve_hours); kb_articles(id, title, category, keywords, solution_steps, team_id); tickets(id, employee_id, title, description, category, priority, team_id, status, created_at, updated_at).
+- Agent tools: lib/agent/tools.ts; use defineTool() with a Zod schema; descriptions start with "Use this when...".
+- Logged-in user is E101 from lib/currentUser.ts; never accept a user id in tool args.
+- Business user: employee at a software company; logged-in user id E101.
+- Priority rule: use sla_rules for priority. P1 = many users blocked or a security issue; P2 = one user fully blocked; P3 = work slowed; P4 = a request.
+- Never use the Supabase secret key in components or commit .env.local.
