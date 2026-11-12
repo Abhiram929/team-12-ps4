@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SRM Agentic AI Hackathon: Starter Template
 
 This is the starting point for every team. It already has the setup done, so you can spend your time on your problem statement.
@@ -106,3 +107,6 @@ Then rewrite `lib/agent/systemPrompt.ts`. Name the business user, the logged-in 
 | `ps6_job_match.sql` | PS6 Job Match Agent |
 
 All dates in the seed data are relative to today, so the data is always fresh. All names, companies and records are made up. You can run a seed file again at any time to reset your data.
+=======
+# team-12-ps4
+>>>>>>> 0d463268bd073dc7c8201c8749c812b1a6d4d810
