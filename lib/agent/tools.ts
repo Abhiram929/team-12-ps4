@@ -44,5 +44,59 @@ const getMyTickets = defineTool({
   },
 });
 
+const createTicket = defineTool({
+  name: "createTicket",
+  description:
+    "Use this when the knowledge base does not solve the issue, or the user explicitly asks to create a support ticket. Maps priority (P1=many users blocked/security, P2=one user blocked, P3=work slowed, P4=request).",
+  writes: true,
+  schema: z.object({
+    title: z.string().min(5).describe("Short title of the support issue"),
+    description: z.string().describe("Details about the support issue"),
+    category: z.string().describe("Category of the support issue"),
+    priority: z.enum(["P1", "P2", "P3", "P4"]).describe("Support ticket priority"),
+  }),
+  run: async ({ title, description, category, priority }) => {
+    const supabase = getSupabase();
+    const { data: slaRule, error: slaError } = await supabase
+      .from("sla_rules")
+      .select("priority")
+      .eq("priority", priority)
+      .maybeSingle();
+    if (slaError) throw new Error(slaError.message);
+    if (!slaRule) {
+      throw new Error(`Priority ${priority} does not have an active SLA rule.`);
+    }
+
+    const { data: categoryArticles, error: categoryError } = await supabase
+      .from("kb_articles")
+      .select("team_id")
+      .eq("category", category);
+    if (categoryError) throw new Error(categoryError.message);
+    const teamIds = [...new Set(categoryArticles.map((article) => article.team_id))];
+    if (teamIds.length !== 1) {
+      throw new Error(
+        teamIds.length === 0
+          ? `No support team is configured for the ${category} category.`
+          : `More than one support team is configured for the ${category} category.`
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("tickets")
+      .insert({
+        employee_id: CURRENT_USER_ID,
+        title,
+        description,
+        category,
+        priority,
+        team_id: teamIds[0],
+      })
+      .select("id, title, priority, status")
+      .single();
+    if (error) throw new Error(error.message);
+    return { created: data };
+  },
+});
+
 /** Every tool in this list is given to Gemini. */
-export const tools: AgentTool[] = [searchKnowledgeBase, getMyTickets];
+export const tools: AgentTool[] = [searchKnowledgeBase, getMyTickets, createTicket];
